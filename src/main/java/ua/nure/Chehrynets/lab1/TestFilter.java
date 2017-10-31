@@ -6,11 +6,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-public class Main {
+public class TestFilter {
 
-    public static final String inputImagePath = "./beforeFilter.jpg";
-    public static final String outputImagePath = "./afterFilter.jpg";
-    public static final String imageFormatName = "jpg";
+    private static final String inputImagePath = "./beforeFilter.jpg";
+    private static final String outputImagePath = "./afterFilter.jpg";
+    private static final String outputImageAfterFilterPath = "./afterFilterX2.jpg";
+    private static final String imageFormatName = "jpg";
 
     public static void main(String[] args) {
         File inputImageFile = new File(inputImagePath);
@@ -20,17 +21,22 @@ public class Main {
 
             long start = System.currentTimeMillis();
 
-            MedianFilter medianFilter = new MedianFilter();
-            medianFilter.filter(image, 1, image.getHeight());
-            System.out.println("Processing duration = " + (System.currentTimeMillis() - start) + " mls");
+            MedianFilter medianFilter = new MedianFilter(image, 1, image.getHeight());
+            medianFilter.filter();
+            System.out.println("Filter duration = " + (System.currentTimeMillis() - start) + " mls");
             ImageIO.write(image, imageFormatName, outputImageFile);
 
             start = System.currentTimeMillis();
             ParallelMedianFilter parallelMedianFilter = new ParallelMedianFilter();
             parallelMedianFilter.executeParallelFilter(image);
             parallelMedianFilter.shutDownExecutor();
-            System.out.println("Parallel processing duration = " + (System.currentTimeMillis() - start) + " mls");
+            System.out.println("Parallel filter duration = " + (System.currentTimeMillis() - start) + " mls");
             ImageIO.write(image, imageFormatName, outputImageFile);
+
+            BufferedImage imageAfterFilter = ImageIO.read(outputImageFile);
+            MedianFilter median = new MedianFilter( imageAfterFilter, 1, imageAfterFilter.getHeight());
+            median.filter();
+            ImageIO.write(imageAfterFilter, imageFormatName, new File(outputImageAfterFilterPath));
 
         } catch (IOException | InterruptedException | ExecutionException ex) {
             System.out.printf(ex.getMessage());

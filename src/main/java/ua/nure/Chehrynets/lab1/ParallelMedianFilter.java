@@ -7,9 +7,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class ParallelMedianFilter {
 
@@ -32,16 +29,16 @@ public class ParallelMedianFilter {
                 int finalI = i;
                 futures.add(executorService.submit(new Runnable() {
                     public void run() {
-                        new MedianFilter()
-                                .filter(image, usedThreads * (finalI - 1), usedThreads * (finalI + 1));
+                        new MedianFilter(image, usedThreads * (finalI - 1), usedThreads * (finalI + 1))
+                                .filter();
                     }
                 }));
             } else {
                 int finalI1 = i;
                 futures.add(executorService.submit(new Runnable() {
                     public void run() {
-                        new MedianFilter()
-                                .filter(image, usedThreads * (finalI1 - 1), image.getHeight());
+                        new MedianFilter(image, usedThreads * (finalI1 - 1), image.getHeight())
+                                .filter();
                     }
                 }));
             }
